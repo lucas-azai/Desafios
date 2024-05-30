@@ -12,25 +12,25 @@ def exibir_menu():
 
 
 # Função para depósito
-def depositar(saldo, extrato):
+def depositar(conta):
     valor = float(input("Informe o valor do depósito: "))
 
     if valor > 0:
-        saldo += valor
-        extrato += f"Depósito: R$ {valor:.2f}\n"
+        conta["saldo"] += valor
+        conta["extrato"] += f"Depósito: R$ {valor:.2f}\n"
     else:
         print("Operação falhou! O valor informado é inválido.")
 
-    return saldo, extrato
+    return conta
 
 
 # Função para saque
-def sacar(saldo, extrato, numero_saques, limite, LIMITE_SAQUES):
+def sacar(conta, limite, LIMITE_SAQUES):
     valor = float(input("Informe o valor do saque: "))
 
-    excedeu_saldo = valor > saldo
+    excedeu_saldo = valor > conta["saldo"]
     excedeu_limite = valor > limite
-    excedeu_saques = numero_saques >= LIMITE_SAQUES
+    excedeu_saques = conta["numero_saques"] >= LIMITE_SAQUES
 
     if valor <= 0:
         print("Operação falhou! O valor informado é inválido.")
@@ -41,21 +41,21 @@ def sacar(saldo, extrato, numero_saques, limite, LIMITE_SAQUES):
     elif excedeu_saques:
         print("Operação falhou! Número máximo de saques excedido.")
     else:
-        saldo -= valor
-        extrato += f"Saque: R$ {valor:.2f}\n"
-        numero_saques += 1
+        conta["saldo"] -= valor
+        conta["extrato"] += f"Saque: R$ {valor:.2f}\n"
+        conta["numero_saques"] += 1
 
-    return saldo, extrato, numero_saques
+    return conta
 
 
 # Função para exibir o extrato
-def exibir_extrato(saldo, extrato):
+def exibir_extrato(conta):
     print("\n================ EXTRATO ================")
-    if extrato:
-        print(extrato)
+    if conta["extrato"]:
+        print(conta["extrato"])
     else:
         print("Não foram realizadas movimentações.")
-    print(f"\nSaldo: R$ {saldo:.2f}")
+    print(f"\nSaldo: R$ {conta['saldo']:.2f}")
     print("==========================================")
 
 
@@ -70,7 +70,7 @@ def cadastrar_usuario(usuarios):
     data_nascimento = input("Informe a data de nascimento (dd/mm/aaaa): ")
     endereco = input("Informe o endereço (logradouro, número - bairro - cidade/UF): ")
 
-    usuarios[cpf] = {"nome": nome, "data_nascimento": data_nascimento, "endereco": endereco}
+    usuarios[cpf] = {"nome": nome, "data_nascimento": data_nascimento, "endereco": endereco, "contas": []}
     print("Usuário cadastrado com sucesso!")
 
     return usuarios
@@ -84,20 +84,39 @@ def cadastrar_conta(contas, usuarios):
         return contas
 
     numero_conta = len(contas) + 1
-    contas[numero_conta] = {"cpf": cpf, "saldo": 0, "extrato": "", "numero_saques": 0}
+    conta = {"numero": numero_conta, "saldo": 0, "extrato": "", "numero_saques": 0}
+    contas[numero_conta] = conta
+    usuarios[cpf]["contas"].append(conta)
     print(f"Conta {numero_conta} cadastrada com sucesso para o usuário {usuarios[cpf]['nome']}!")
 
     return contas
+
+
+# Função para selecionar uma conta
+def selecionar_conta(usuarios):
+    cpf = input("Informe o CPF do usuário: ")
+    if cpf not in usuarios:
+        print("Usuário não encontrado!")
+        return None, None
+
+    print("Contas do usuário:")
+    for conta in usuarios[cpf]["contas"]:
+        print(f"Conta {conta['numero']}: Saldo R$ {conta['saldo']:.2f}")
+
+    numero_conta = int(input("Informe o número da conta: "))
+    for conta in usuarios[cpf]["contas"]:
+        if conta["numero"] == numero_conta:
+            return cpf, conta
+
+    print("Conta não encontrada!")
+    return None, None
 
 
 # Variáveis globais
 usuarios = {}
 contas = {}
 
-saldo = 0
 limite = 1500
-extrato = ""
-numero_saques = 0
 LIMITE_SAQUES = 10
 
 # Loop principal
@@ -105,13 +124,19 @@ while True:
     opcao = exibir_menu()
 
     if opcao == "d":
-        saldo, extrato = depositar(saldo, extrato)
+        cpf, conta = selecionar_conta(usuarios)
+        if conta:
+            conta = depositar(conta)
 
     elif opcao == "s":
-        saldo, extrato, numero_saques = sacar(saldo, extrato, numero_saques, limite, LIMITE_SAQUES)
+        cpf, conta = selecionar_conta(usuarios)
+        if conta:
+            conta = sacar(conta, limite, LIMITE_SAQUES)
 
     elif opcao == "e":
-        exibir_extrato(saldo, extrato)
+        cpf, conta = selecionar_conta(usuarios)
+        if conta:
+            exibir_extrato(conta)
 
     elif opcao == "c":
         usuarios = cadastrar_usuario(usuarios)
