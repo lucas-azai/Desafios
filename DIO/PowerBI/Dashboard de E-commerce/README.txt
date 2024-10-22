@@ -1,0 +1,1 @@
+Este projeto demonstra como criar uma tabela de calendário no Power BI usando DAX, além de como integrá-la ao modelo de dados para análises temporais robustas. A tabela D_Calendário é essencial em qualquer modelo de dados voltado para o tempo e facilita a criação de relatórios dinâmicos e precisos.
