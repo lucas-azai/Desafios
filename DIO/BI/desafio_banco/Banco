@@ -1,0 +1,47 @@
+CREATE TABLE Cliente (
+    id_cliente INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
+    tipo_cliente ENUM('PF', 'PJ') NOT NULL,
+    cpf VARCHAR(11),
+    cnpj VARCHAR(14),
+    razao_social VARCHAR(100),
+    UNIQUE(cpf),
+    UNIQUE(cnpj)
+);
+
+CREATE TABLE Conta (
+    id_conta INT PRIMARY KEY AUTO_INCREMENT,
+    id_cliente INT NOT NULL,
+    saldo DECIMAL(10, 2) DEFAULT 0.0,
+    FOREIGN KEY (id_cliente) REFERENCES Cliente(id_cliente)
+);
+
+CREATE TABLE Pedido (
+    id_pedido INT PRIMARY KEY AUTO_INCREMENT,
+    id_conta INT NOT NULL,
+    data_pedido DATE NOT NULL,
+    total DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (id_conta) REFERENCES Conta(id_conta)
+);
+
+CREATE TABLE FormaPagamento (
+    id_forma_pagamento INT PRIMARY KEY AUTO_INCREMENT,
+    descricao VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE PedidoPagamento (
+    id_pedido INT,
+    id_forma_pagamento INT,
+    valor_pago DECIMAL(10, 2),
+    PRIMARY KEY (id_pedido, id_forma_pagamento),
+    FOREIGN KEY (id_pedido) REFERENCES Pedido(id_pedido),
+    FOREIGN KEY (id_forma_pagamento) REFERENCES FormaPagamento(id_forma_pagamento)
+);
+
+CREATE TABLE Entrega (
+    id_entrega INT PRIMARY KEY AUTO_INCREMENT,
+    id_pedido INT NOT NULL,
+    status ENUM('Pendente', 'Enviado', 'Entregue') NOT NULL,
+    codigo_rastreamento VARCHAR(50),
+    FOREIGN KEY (id_pedido) REFERENCES Pedido(id_pedido)
+);
