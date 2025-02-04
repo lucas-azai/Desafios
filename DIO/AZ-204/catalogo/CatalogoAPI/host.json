@@ -1,0 +1,32 @@
+{
+    "version": "2.0",
+    "logging": {
+      "applicationInsights": {
+        "samplingExcludedTypes": "Request",
+        "samplingSettings": {
+          "isEnabled": true
+        }
+      },
+      "logLevel": {
+        "Function": "Information",
+        "Host": "Warning"
+      }
+    },
+    "extensionBundle": {
+      "id": "Microsoft.Azure.Functions.ExtensionBundle",
+      "version": "[3.*, 4.0.0)"
+    },
+    "extensions": {
+      "cosmosDB": {
+        "connectionMode": "Gateway",
+        "preferredLocations": [
+          "East US"
+        ]
+      },
+      "http": {
+        "routePrefix": "api"
+      }
+    },
+    "functionTimeout": "00:05:00"
+  }
+  
