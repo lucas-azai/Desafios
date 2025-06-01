@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>7-Day Weather Forecast - Europe</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #e0f7fa, #ffffff);
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #004d66;
+            text-align: center;
+        }
+        #forecast {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .day {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            text-align: center;
+        }
+        .weather-icon {
+            width: 64px;
+            height: 64px;
+            margin: 10px auto;
+        }
+        label, select, button {
+            font-size: 16px;
+            margin: 0 5px;
+        }
+        #controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>European City 7-Day Weather Forecast</h1>
+
+    <div id="controls">
+        <label for="city">Select a City:</label>
+        <select id="city">
+            <option value="52.52,13.405">Berlin</option>
+            <option value="48.8566,2.3522">Paris</option>
+            <option value="41.9028,12.4964">Rome</option>
+            <option value="51.5074,-0.1278">London</option>
+            <option value="40.4168,-3.7038">Madrid</option>
+        </select>
+        <button onclick="getWeather()">Get Forecast</button>
+    </div>
+
+    <div id="forecast"></div>
+
+    <script>
+        const weatherIcons = {
+            clear: "https://openweathermap.org/img/wn/01d.png",
+            cloudy: "https://openweathermap.org/img/wn/03d.png",
+            cloudyday: "https://openweathermap.org/img/wn/03d.png",
+            cloudynight: "https://openweathermap.org/img/wn/03n.png",
+            humid: "https://openweathermap.org/img/wn/50d.png",
+            lightrain: "https://openweathermap.org/img/wn/09d.png",
+            lightshowers: "https://openweathermap.org/img/wn/09d.png",
+            lightsnow: "https://openweathermap.org/img/wn/13d.png",
+            mcloudy: "https://openweathermap.org/img/wn/02d.png",
+            oshower: "https://openweathermap.org/img/wn/09d.png",
+            pcloudy: "https://openweathermap.org/img/wn/02d.png",
+            pcloudyday: "https://openweathermap.org/img/wn/02d.png",
+            pcloudynight: "https://openweathermap.org/img/wn/02n.png",
+            rain: "https://openweathermap.org/img/wn/10d.png",
+            showers: "https://openweathermap.org/img/wn/09d.png",
+            snow: "https://openweathermap.org/img/wn/13d.png",
+            thunderstorm: "https://openweathermap.org/img/wn/11d.png",
+            ts: "https://openweathermap.org/img/wn/11d.png"
+        };
+
+        async function getWeather() {
+            const forecastDiv = document.getElementById("forecast");
+            forecastDiv.innerHTML = "Loading forecast...";
+
+            const coords = document.getElementById("city").value;
+            const [lat, lon] = coords.split(',');
+
+            try {
+                const response = await fetch(`https://www.7timer.info/bin/api.pl?lon=${lon}&lat=${lat}&product=civil&output=json`);
+                const data = await response.json();
+
+                forecastDiv.innerHTML = "";
+                const dailyForecasts = data.dataseries.slice(0, 7);
+
+                dailyForecasts.forEach((day, index) => {
+                    const date = new Date();
+                    date.setDate(date.getDate() + index);
+                    const formattedDate = date.toDateString();
+
+                    const temp = day.temp2m ?? "-";
+                    const weather = day.weather;
+                    const iconUrl = weatherIcons[weather] || "https://openweathermap.org/img/wn/50d.png";
+
+                    const dayDiv = document.createElement("div");
+                    dayDiv.className = "day";
+                    dayDiv.innerHTML = `
+                        <h3>Day ${index + 1}</h3>
+                        <p><strong>Date:</strong> ${formattedDate}</p>
+                        <img class="weather-icon" src="${iconUrl}" alt="${weather}">
+                        <p><strong>Weather:</strong> ${weather}</p>
+                        <p><strong>Temperature (2m):</strong> ${temp}&deg;C</p>
+                    `;
+                    forecastDiv.appendChild(dayDiv);
+                });
+            } catch (error) {
+                forecastDiv.innerHTML = "<p style='color:red;'>Error retrieving weather data. Please try again later.</p>";
+            }
+        }
+    </script>
+</body>
+</html>
